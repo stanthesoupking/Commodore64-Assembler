@@ -20,5 +20,5 @@ c64_assembler [input-file] [output-file]
 ### For example
 Compiling the example program, `counter.basic`, would require the following command:
 ```
-c64_assembler ../examples/counter.basic ../examples/counter
+c64_assembler ../examples/counter.bas ../examples/counter.prg
 ```
