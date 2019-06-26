@@ -1,4 +1,4 @@
-#include "tokeniser.h"
+#include "assembler.h"
 
 #include "util.h"
 #include <stdio.h>
@@ -18,7 +18,7 @@ union uByte {
     char byte[4];
 };
 
-void tokenise(Language* lang, char *input, char *output)
+void assemble(Language* lang, Expander* expander, char *input, char *output)
 {
     FILE *fin;
     FILE *fout;
@@ -27,7 +27,8 @@ void tokenise(Language* lang, char *input, char *output)
     unsigned int bpos;
     enum t_state state;
     char c;
-    char* tstring;
+    char* expandedString;
+    char* tokenisedString;
     int cpos;
     union uByte progStart;
     union uByte currentByte;
@@ -35,7 +36,20 @@ void tokenise(Language* lang, char *input, char *output)
     bzero(buffer, LINE_BUFFER_SIZE + 1);
 
     fin = fopen(input, "r");
+
+    if(!fin)
+    {
+        printf("Error: Failed loading input file.\n");
+        return;
+    }
+
     fout = fopen(output, "w");
+
+    if(!fout)
+    {
+        printf("Error: Failed accessing output file.\n");
+        return;
+    }
 
     // Write pointer to first line of program (2049)
     progStart.integer = 2049;
@@ -67,8 +81,17 @@ void tokenise(Language* lang, char *input, char *output)
                 printf("Error: No space after line number detected.\n");
             }
             
-            tstring = tokeniseString(lang, buffer + cpos + 1, bpos);
-            currentByte.integer += strlen(tstring) + 5;
+            // Uncomment these lines for debugging
+            //printf("Pass #1: Macro Expansion\n");
+            expandedString = expandString(expander, buffer + cpos + 1, bpos);
+            //printf("\t%s\n", expandedString);
+            //printf("Done.\n\n");
+
+            //printf("Pass #2: Tokenisation\n");
+            tokenisedString = tokeniseString(lang, expandedString, strlen(expandedString));
+            currentByte.integer += strlen(tokenisedString) + 5;
+            //printf("\t%s\n", tokenisedString);
+            //printf("Done.\n\n");
 
             // Write pointer to next line
             writeBytes(fout, currentByte.byte, 2);
@@ -77,7 +100,7 @@ void tokenise(Language* lang, char *input, char *output)
             line_num.integer = strtol(buffer, NULL, 10);
             writeBytes(fout, line_num.byte, 2);
 
-            fputs(tstring, fout);
+            fputs(tokenisedString, fout);
 
             writeByte(fout, 0x00); // Write end of line
             

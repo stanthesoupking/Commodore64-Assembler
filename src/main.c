@@ -1,10 +1,18 @@
 #include <stdio.h>
 
-#include "tokeniser.h"
+#include "assembler.h"
+#include "expander.h"
+#include <string.h>
 
 // The total number of basic tokens
 // WARNING: If a new token is added, this number needs to be updated manually.
 #define NUMBER_OF_TOKENS 76
+
+// The total number of expansions
+// WARNING: If a new expansion is added, this number needs to be updated manually.
+#define NUMBER_OF_EXPANSIONS 40
+
+#define VERSION "0.1.1"
 
 int main(int argc, char **argv)
 {
@@ -23,7 +31,47 @@ int main(int argc, char **argv)
    // Values of each basic keyword (generated later on)
    unsigned char t_values[NUMBER_OF_TOKENS];
 
+   // List of expansions(from)
+   char* e_from[] = {
+      // Col 1    ...   Col 2         ...    Col3
+      "{CLEAR}",        "{RUNSTOP}",         "{WHITE}",        // Row 1
+      "{RETURN}",       "{CURSOR-DOWN}",     "{REVERSE-ON}",   // Row 2
+      "{HOME}",         "{DELETE}",          "{RED}",          // Row 3
+      "{CURSOR-RIGHT}", "{GREEN}",           "{BLUE}",         // Row 4
+      "{LOAD-RUN}",     "{F1}",              "{F3}",           // Row 5
+      "{F5}",           "{F7}",              "{F2}",           // Row 6
+      "{F4}",           "{F6}",              "{F8}",           // Row 7
+      "{LF}",           "{GRAPHICS}",        "{BLACK}",        // Row 8
+      "{CURSOR-UP}",    "{REVERSE-OFF}",     "{INSERT}",       // Row 9
+      "{BROWN}",        "{LIGHT-RED}",       "{DARK-GREY}",    // Row 10
+      "{GREY}",         "{LIGHT-GREEN}",     "{LIGHT-BLUE}",   // Row 11
+      "{LIGHT-GREY}",   "{PURPLE}",          "{CURSOR-LEFT}",  // Row 12
+      "{YELLOW}",       "{CYAN}",            "{NBSP}",         // Row 13
+      "{TEXT-MODE}"                                            // Row 14
+
+   };
+
+   // List of expansions(to)
+   char* e_to[] = {
+      // Col 1    ...   Col 2         ...    Col3
+      "\x93",           "\x03",              "\x05",  // Row 1
+      "\x0D",           "\x11",              "\x12",  // Row 2
+      "\x13",           "\x14",              "\x1C",  // Row 3
+      "\x1D",           "\x1E",              "\x1F",  // Row 4
+      "\x83",           "\x85",              "\x86",  // Row 5
+      "\x87",           "\x88",              "\x89",  // Row 6
+      "\x8A",           "\x8B",              "\x8C",  // Row 7
+      "\x8D",           "\x8E",              "\x90",  // Row 8
+      "\x91",           "\x92",              "\x94",  // Row 9
+      "\x95",           "\x96",              "\x97",  // Row 10
+      "\x98",           "\x99",              "\x9A",  // Row 11
+      "\x9B",           "\x9C",              "\x9D",  // Row 12
+      "\x9E",           "\x9F",              "\xA0",  // Row 13
+      "\x0E"                                          // Row 14
+   };
+
    Language* basicLang;
+   Expander* expander;
 
    unsigned char j;
 
@@ -33,6 +81,16 @@ int main(int argc, char **argv)
    if (argc < 2)
    {
       printf("Error: No input file supplied.\n");
+   }
+   else
+   {
+      // Check if program version is to be printed
+      if((strcmp("--version", argv[1]) == 0) || (strcmp("-v", argv[1]) == 0))
+      {
+         printf("Commodore 64 Basic Assembler v%s\n", VERSION);
+         printf("Programmed by Stanley Fuller, 2019\n");
+         return 0;
+      }
    }
 
    input = argv[1]; // Get path to input file
@@ -54,9 +112,10 @@ int main(int argc, char **argv)
    }
 
    basicLang = createLanguage(t_keywords, t_values, NUMBER_OF_TOKENS);
+   expander = createExpander(e_from, e_to, NUMBER_OF_EXPANSIONS);
 
    printf("Assembling...\n");
-   tokenise(basicLang, input, output);
+   assemble(basicLang, expander, input, output);
    printf("Complete!\n");
 
    return 0;
