@@ -24,6 +24,7 @@ Language* createLanguage(char** keywords, unsigned char* values, unsigned int co
 
     lang->tokens = createLinkedList();
 
+    // Populate Keyword -> Value array
     for(i = 0; i < count; i++)
     {
         token = (LanguageToken*) malloc(sizeof(struct language_token_int));
@@ -52,13 +53,18 @@ char* tokeniseString(Language* lang, char* input, unsigned int length)
     unsigned int i, j;
     unsigned int rpos; // Position in result buffer
 
+    // Initialise and clear result buffer
     result = (char*) malloc(sizeof(char) * (length + 1));
     bzero(result, length + 1);
 
+    // Set buffer position to start of result buffer; 0
     rpos = 0;
     for(i = 0; i < length; i++)
     {
+        // Move on to next character of string; ignore the first i characters
         currentString = (char*)input + i;
+
+        // Look for keyword matches in the current string
         m = findMatch(lang, currentString, length - i);
 
         // Are we entering a quoted string
@@ -77,8 +83,11 @@ char* tokeniseString(Language* lang, char* input, unsigned int length)
 
             // Copy quote directly
             strncat(result, currentString, j + 2);
+
+            // Increase rpos to match the length of the inserted text
             rpos += j + 2;
 
+            // Move input buffer to end of quote
             i += j + 1;
             continue;
         }

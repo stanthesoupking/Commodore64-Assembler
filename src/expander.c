@@ -15,6 +15,7 @@ Expander* createExpander(char** from, char** to, unsigned int count)
     e->expansions = (Expansion**) malloc(sizeof(struct expansion_int*) * count);
     e->expansion_count = count;
 
+    // Populate expansion array
     for(i = 0; i < count; i++)
     {
         expansion = (Expansion*) malloc(sizeof(struct expansion_int));
@@ -62,6 +63,7 @@ char* expandString(Expander* e, char* input, unsigned int length)
     rpos = 0;
     for(spos = 0; spos < length; spos++)
     {
+        // Attempt to find match for macro expansion
         expansion = findExpansionMatch(e, (char*) input + spos, length - spos);
 
         if(expansion) // If an expansion was found...

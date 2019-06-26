@@ -12,7 +12,8 @@
 // WARNING: If a new expansion is added, this number needs to be updated manually.
 #define NUMBER_OF_EXPANSIONS 40
 
-#define VERSION "0.1.1"
+// The current program version
+#define VERSION "0.1.2"
 
 int main(int argc, char **argv)
 {
@@ -31,7 +32,7 @@ int main(int argc, char **argv)
    // Values of each basic keyword (generated later on)
    unsigned char t_values[NUMBER_OF_TOKENS];
 
-   // List of expansions(from)
+   // List of PETSCII expansions(from)
    char* e_from[] = {
       // Col 1    ...   Col 2         ...    Col3
       "{CLEAR}",        "{RUNSTOP}",         "{WHITE}",        // Row 1
@@ -51,7 +52,7 @@ int main(int argc, char **argv)
 
    };
 
-   // List of expansions(to)
+   // List of PETSCII expansions(to)
    char* e_to[] = {
       // Col 1    ...   Col 2         ...    Col3
       "\x93",           "\x03",              "\x05",  // Row 1
@@ -70,17 +71,18 @@ int main(int argc, char **argv)
       "\x0E"                                          // Row 14
    };
 
-   Language* basicLang;
-   Expander* expander;
+   Language* basicLang; // Commodore64 Basic keyword tokeniser
+   Expander* expander;  // Macro expander
 
    unsigned char j;
 
-   char *input;
-   char *output;
+   char *input;   // Input file path
+   char *output;  // Output file path
 
    if (argc < 2)
    {
       printf("Error: No input file supplied.\n");
+      return 1;
    }
    else
    {
@@ -102,7 +104,8 @@ int main(int argc, char **argv)
    }
    else
    {
-      output = "output";
+      // Use default path; output.prg
+      output = "output.prg";
    }
 
    // Initialise tokeniser
@@ -112,10 +115,15 @@ int main(int argc, char **argv)
    }
 
    basicLang = createLanguage(t_keywords, t_values, NUMBER_OF_TOKENS);
+   
+   // Initialise macro expander
    expander = createExpander(e_from, e_to, NUMBER_OF_EXPANSIONS);
 
+   // Assemble file and write to output path
    printf("Assembling...\n");
+   
    assemble(basicLang, expander, input, output);
+   
    printf("Complete!\n");
 
    return 0;

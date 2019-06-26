@@ -7,12 +7,6 @@
 
 #define LINE_BUFFER_SIZE 255
 
-enum t_state {
-    GET_LINE_NUM,
-    GET_KEYWORD,
-    GET_VALUE
-};
-
 union uByte {
     unsigned int integer;
     char byte[4];
@@ -25,7 +19,6 @@ void assemble(Language* lang, Expander* expander, char *input, char *output)
     char buffer[LINE_BUFFER_SIZE+1]; // + 1 for final NULL character
     union uByte line_num;
     unsigned int bpos;
-    enum t_state state;
     char c;
     char* expandedString;
     char* tokenisedString;
@@ -33,8 +26,7 @@ void assemble(Language* lang, Expander* expander, char *input, char *output)
     union uByte progStart;
     union uByte currentByte;
 
-    bzero(buffer, LINE_BUFFER_SIZE + 1);
-
+    // Attempt to open input file
     fin = fopen(input, "r");
 
     if(!fin)
@@ -43,6 +35,7 @@ void assemble(Language* lang, Expander* expander, char *input, char *output)
         return;
     }
 
+    // Attempt to open output file
     fout = fopen(output, "w");
 
     if(!fout)
@@ -55,9 +48,16 @@ void assemble(Language* lang, Expander* expander, char *input, char *output)
     progStart.integer = 2049;
     writeBytes(fout, progStart.byte, 2);
 
+    // Set current byte position to the start of the program
     currentByte.integer = progStart.integer;
-    state = GET_LINE_NUM;
+
+    // Set buffer position to start of buffer; 0
     bpos = 0;
+
+    // Clear input buffer
+    bzero(buffer, LINE_BUFFER_SIZE + 1);
+
+    // Get first character in file
     c = getc(fin);
 
     while(1)
@@ -107,6 +107,10 @@ void assemble(Language* lang, Expander* expander, char *input, char *output)
             bzero(buffer, bpos);
             bpos = 0;
 
+            // Free memory taken up by tokenised and expanded strings
+            free(expandedString);
+            free(tokenisedString);
+
             // End read-file loop if end-of-file
             if(c == EOF)
             {
@@ -119,6 +123,7 @@ void assemble(Language* lang, Expander* expander, char *input, char *output)
             buffer[bpos++] = c;
         }
         
+        // Get next character in input file
         c = getc(fin);
     }
     writeByte(fout, 0x00); // Write end of file termination

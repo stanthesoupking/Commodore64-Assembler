@@ -1,6 +1,5 @@
 #pragma once
 
-#include "hash_table.h"
 #include "language.h"
 #include "expander.h"
 #include <stdlib.h>
