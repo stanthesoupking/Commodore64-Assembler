@@ -1,5 +1,7 @@
 # Commodore64 Assembler
-Assembles plain text files into C64-readable, tokenised format.  
+This project's primary aim is to make Commodore 64 development on a PC more streamlined. The end goal is a Basic assembler that can automate many tasks which make Commodore 64 development frustrating, such as: line number management and Commodore-unique PETSCII characters.
+
+For more details please read the [wiki](https://github.com/stanthesoupking/Commodore64-Assembler/wiki).
 
 *Note: This project is in its early stages of development and currently only supports translating plain text to the tokenised C64 format. Assembling features are coming soon(hopefully) :)*
 
@@ -14,11 +16,11 @@ make
 
 ## Usage
 ```
-c64_assembler [input-file] [output-file]
+c64_assembler <input-file> <output-file>
 ```
 
 ### For example
-Compiling the example program, `counter.basic`, would require the following command:
+Compiling the example program, `counter.bas`, would require the following command:
 ```
-c64_assembler ../examples/counter.bas ../examples/counter.prg
+c64_assembler counter.bas counter.prg
 ```
