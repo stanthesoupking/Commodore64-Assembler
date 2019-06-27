@@ -13,7 +13,7 @@
 #define NUMBER_OF_EXPANSIONS 40
 
 // The current program version
-#define VERSION "0.2.0"
+#define VERSION "0.2.1"
 
 int main(int argc, char **argv)
 {

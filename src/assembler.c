@@ -85,8 +85,6 @@ enum assemble_status assemble(Language *lang, Expander *expander, char *input, c
             {
                 // Copy string into file buffer
                 tokLine = tokeniseString(lang, buffer, bpos);
-                // s = (char*) malloc(sizeof(char) * bpos);
-                // strncpy(s, buffer, bpos);
                 expLine = expandString(expander, tokLine, strlen(tokLine));
                 
                 free(tokLine);
@@ -95,7 +93,7 @@ enum assemble_status assemble(Language *lang, Expander *expander, char *input, c
             }
 
             // Reset line buffer
-            bzero(buffer, bpos);
+            bzero(buffer, LINE_BUFFER_SIZE + 1);
             bpos = 0;
 
             // If end of file, stop reading.
@@ -114,12 +112,6 @@ enum assemble_status assemble(Language *lang, Expander *expander, char *input, c
         c = getc(fin);
     }
     printf("Read %d line(s).\n\n", fileLineCount);
-
-    // Print file contents
-    for(i = 0; i < fileLineCount; i++)
-    {
-        printf("%d: %s\n", i, fileBuffer[i]);
-    }
 
     printf("Creating line link dictionary...\n");
     lineLinks = createHashTable();
@@ -156,13 +148,14 @@ enum assemble_status assemble(Language *lang, Expander *expander, char *input, c
             // Remove tag from file line
             newLineLength = strlen(s) - bpos;
             newLine = (char*) malloc(sizeof(char) * newLineLength + 1);
+            bzero(newLine, OBJC_NEW_PROPERTIES);
 
-            strncpy(newLine, s + bpos, newLineLength);
+            strncat(newLine, s + bpos, newLineLength);
 
             free(fileBuffer[i]);
             fileBuffer[i] = newLine;
 
-            bzero(buffer, bpos);
+            bzero(buffer, LINE_BUFFER_SIZE + 1);
             bpos = 0;
             counter++;
         }
@@ -180,14 +173,13 @@ enum assemble_status assemble(Language *lang, Expander *expander, char *input, c
         bzero(linkedLine, 255);
 
         j = 0;
-        c = s[j];
+        c = s[j++];
         while(c != '\n' && c != '\0')
         {
             if(c == '"')
             {
                 // Skip quoted content
                 x = getIndexOfChr(s + j, '"');
-                printf("%s\n", s + j);
                 if(x == -1)
                 {
                     // Final quote doesn't exist, produce error
@@ -222,11 +214,10 @@ enum assemble_status assemble(Language *lang, Expander *expander, char *input, c
                         buffer[bpos++] = v;
                         v = s[j++];
                     }
+                    j--;
 
                     if(bpos != 0)
                     {
-                        printf("buffer: %s\n", buffer);
-
                         if(hashTableHas(lineLinks, buffer))
                         {
                             linePointer = hashTableGet(lineLinks, buffer);
@@ -242,6 +233,8 @@ enum assemble_status assemble(Language *lang, Expander *expander, char *input, c
 
                             // Move position in line buffer along
                             lpos += strlen(linePointerS);
+
+                            counter++;
                         }
                         else
                         {
@@ -249,9 +242,8 @@ enum assemble_status assemble(Language *lang, Expander *expander, char *input, c
                             printf("Error: Attempted to link line to tag that doesn't exist.\n");
                             return UNDEFINED_TAG_ERROR;
                         }
-                        
 
-                        bzero(buffer, bpos);
+                        bzero(buffer, LINE_BUFFER_SIZE + 1);
                         bpos = 0;
                     }
                 }
@@ -264,15 +256,8 @@ enum assemble_status assemble(Language *lang, Expander *expander, char *input, c
         }
         free(s);
         fileBuffer[i] = linkedLine;
-        counter++;
     }
     printf("Linked %d line(s).\n\n", counter);
-
-    // Print file contents
-    for(i = 0; i < fileLineCount; i++)
-    {
-        printf("%d: %s\n", i, fileBuffer[i]);
-    }
 
     // --- Write to output file ---
 
@@ -285,7 +270,7 @@ enum assemble_status assemble(Language *lang, Expander *expander, char *input, c
         s = fileBuffer[i]; // Get line from file buffer
 
         // Clear line buffer
-        bzero(buffer, LINE_BUFFER_SIZE);
+        bzero(buffer, LINE_BUFFER_SIZE + 1);
         bpos = 0;
 
         j = 0; // Position in file buffer line
