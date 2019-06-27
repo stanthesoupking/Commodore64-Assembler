@@ -3,8 +3,6 @@ This project's primary aim is to make Commodore 64 development on a PC more stre
 
 For more details please read the [wiki](https://github.com/stanthesoupking/Commodore64-Assembler/wiki).
 
-*Note: This project is in its early stages of development and currently only supports translating plain text to the tokenised C64 format. Assembling features are coming soon(hopefully) :)*
-
 ## Compiling
 To compile, run the following commands from the root directory of the project:
 ```bash

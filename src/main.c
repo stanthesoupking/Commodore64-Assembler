@@ -13,7 +13,7 @@
 #define NUMBER_OF_EXPANSIONS 40
 
 // The current program version
-#define VERSION "0.1.2"
+#define VERSION "0.2.0"
 
 int main(int argc, char **argv)
 {
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
    expander = createExpander(e_from, e_to, NUMBER_OF_EXPANSIONS);
 
    // Assemble file and write to output path
-   printf("Assembling...\n");
+   printf("Assembling...\n\n");
    
    assemble(basicLang, expander, input, output);
    
